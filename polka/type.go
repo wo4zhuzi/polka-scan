@@ -42,7 +42,7 @@ type Logs struct {
 }
 
 type Extrinsics struct {
-	Method		string
+	Method		Method
 	Signature	interface{}
 	Nonce		string
 	Args		interface{}
@@ -55,6 +55,11 @@ type Extrinsics struct {
 }
 
 type Events struct {
-	Method 	string
+	Method 	Method
 	Data 	[]interface{}
+}
+
+type Method struct {
+	Pallet 	string
+	Method	string
 }

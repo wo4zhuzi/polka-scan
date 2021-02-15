@@ -9,12 +9,9 @@ import (
 	"polka-scan/conf"
 	"polka-scan/mongodb"
 	"strconv"
-	"strings"
 )
 
 func (p Extrinsics) ToMongoExtrinsics(block Block) mongodb.Extrinsics  {
-
-	method:=strings.Split(p.Method,".")
 
 	argsArr := p.Args.(map[string]interface{})
 	destAddress  := ""
@@ -69,8 +66,8 @@ func (p Extrinsics) ToMongoExtrinsics(block Block) mongodb.Extrinsics  {
 		//ExtrinsicLength:    "",
 		//VersionInfo:        "",
 		//CallCode:           "",
-		CallModule:         method[0],
-		CallModuleFunction: method[1],
+		CallModule:         p.Method.Pallet,
+		CallModuleFunction: p.Method.Method,
 		//Args:               string(args),
 		Args:               "",
 		Address:            address,
@@ -114,7 +111,7 @@ func (p Extrinsics) ToMongoAddressBalanceChangeList(block Block) []mongodb.Addre
 
 	//处理交易失败的数据
 	if p.Success == false {
-		if p.Method == "balances.transferKeepAlive" || p.Method == "balances.transfer" || p.Method == "balances.forceTransfer" {
+		if p.Method.Pallet == "balances" && (p.Method.Method == "transferKeepAlive" || p.Method.Method == "transfer" || p.Method.Method == "forceTransfer") {
 
 			signature := p.Signature.(map[string]interface{})
 			args := p.Args.(map[string]interface{})
@@ -138,7 +135,7 @@ func (p Extrinsics) ToMongoAddressBalanceChangeList(block Block) []mongodb.Addre
 	}
 
 	for _, event := range events {
-		if event.Method == "balances.Transfer" {
+		if event.Method.Pallet == "balances" && event.Method.Method == "Transfer" {
 			_value_float64, _ := strconv.ParseFloat(event.Data[2].(string), 64)
 			value := _value_float64 / math.Pow(10, Decimal)
 			addressBalanceChange := mongodb.AddressBalanceChange{
@@ -164,14 +161,12 @@ func (p Extrinsics) ToMongoEvensList() []mongodb.Events  {
 	var eventsList []mongodb.Events
 
 	for _, event := range events {
-
-		method:=strings.Split(p.Method,".")
 		data, _ := json.Marshal(event.Data)
 
 		mongoEvents := mongodb.Events{
 			ExtrinsicHash:      p.Hash,
-			CallModule:        	method[0],
-			CallModuleFunction: method[1],
+			CallModule:        	p.Method.Pallet,
+			CallModuleFunction: p.Method.Method,
 			Data:               string(data),
 		}
 
@@ -185,7 +180,7 @@ func GetBlockData(blockNum int) (Block, error) {
 	polkadotConf := conf.IniFile.Section("polkadot")
 	api := polkadotConf.Key("api").String()
 
-	resp, err := http.Get(""+ api +"/block/" + strconv.Itoa(blockNum))
+	resp, err := http.Get(""+ api +"/blocks/" + strconv.Itoa(blockNum))
 
 	if err != nil {
 		fmt.Println(err)
@@ -204,7 +199,7 @@ func GetOnlineHeight() (int, error) {
 	polkadotConf := conf.IniFile.Section("polkadot")
 	api := polkadotConf.Key("api").String()
 
-	resp, err := http.Get(""+ api +"/block")
+	resp, err := http.Get(""+ api +"/block/head")
 
 	if err != nil {
 		fmt.Println(err)
