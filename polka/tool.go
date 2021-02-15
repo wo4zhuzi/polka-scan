@@ -199,7 +199,7 @@ func GetOnlineHeight() (int, error) {
 	polkadotConf := conf.IniFile.Section("polkadot")
 	api := polkadotConf.Key("api").String()
 
-	resp, err := http.Get(""+ api +"/block/head")
+	resp, err := http.Get(""+ api +"/blocks/head")
 
 	if err != nil {
 		fmt.Println(err)
