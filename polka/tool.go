@@ -17,11 +17,18 @@ func (p Extrinsics) ToMongoExtrinsics(block Block) mongodb.Extrinsics  {
 	destAddress  := ""
 
 	var value float64 = 0
-	_destAddress, exists := argsArr["dest"].(string)
 
+	//3899547块 之前返回格式
+	_destAddress, exists := argsArr["dest"].(string)
 	if exists {
 		destAddress = _destAddress
+	} else {
+		dest, ok := argsArr["dest"].(map[string]interface{})
+		if ok {
+			destAddress, _ = dest["Id"].(string)
+		}
 	}
+
 	_value, exists := argsArr["value"].(string)
 
 	if exists {
@@ -36,7 +43,14 @@ func (p Extrinsics) ToMongoExtrinsics(block Block) mongodb.Extrinsics  {
 	address := ""
 	IsSigned := false
 	if ok {
-		address = signature["signer"].(string)
+		//3899547块 之前返回格式
+		address, ok = signature["signer"].(string)
+
+		if !ok {
+			signer := signature["signer"].(map[string]interface{})
+			address = signer["Id"].(string)
+		}
+
 		IsSigned = true
 	}
 
@@ -114,7 +128,26 @@ func (p Extrinsics) ToMongoAddressBalanceChangeList(block Block) []mongodb.Addre
 		if p.Method.Pallet == "balances" && (p.Method.Method == "transferKeepAlive" || p.Method.Method == "transfer" || p.Method.Method == "forceTransfer") {
 
 			signature := p.Signature.(map[string]interface{})
+
+			//3899547块 之前返回格式
+			from, ok := signature["signer"].(string)
+			//3899547块 之后返回格式
+			if !ok {
+				signer := signature["signer"].(map[string]interface{})
+				from = signer["Id"].(string)
+			}
+
 			args := p.Args.(map[string]interface{})
+
+			to, ok := args["dest"].(string)
+			if !ok {
+				dest := args["dest"].(map[string]interface{})
+				to, ok = dest["Id"].(string)
+				if !ok {
+					to, _ =  dest["Index"].(string)
+					to = fmt.Sprintf("index:%v", to)
+				}
+			}
 
 			_value_float64, _ := strconv.ParseFloat(args["value"].(string), 64)
 			value := _value_float64 / math.Pow(10, Decimal)
@@ -122,8 +155,8 @@ func (p Extrinsics) ToMongoAddressBalanceChangeList(block Block) []mongodb.Addre
 			addressBalanceChange := mongodb.AddressBalanceChange{
 				BlockNum:      BlockNum,
 				Time:          BlockTimestamp,
-				From:          signature["signer"].(string),
-				To:            args["dest"].(string),
+				From:          from,
+				To:            to,
 				Value:         value,
 				Fee:           fee,
 				ExtrinsicHash: p.Hash,
