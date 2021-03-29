@@ -44,9 +44,9 @@ type Logs struct {
 type Extrinsics struct {
 	Method		Method
 	Signature	interface{}
-	Nonce		string
+	Nonce		interface{}
 	Args		interface{}
-	Tip			string
+	Tip			interface{}
 	Hash		string
 	Info 		interface{}
 	Events		[]Events

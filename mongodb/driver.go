@@ -14,9 +14,14 @@ func init()  {
 	mongoConf := conf.IniFile.Section("mongodb")
 	ip := mongoConf.Key("ip").String()
 	port := mongoConf.Key("port").String()
+	username := mongoConf.Key("username").String()
+	password := mongoConf.Key("password").String()
 
 	// 设置客户端连接配置
-	clientOptions := options.Client().ApplyURI("mongodb://"+ ip +":"+ port +"")
+	clientOptions := options.Client().ApplyURI("mongodb://"+ ip +":"+ port +"").SetAuth(options.Credential{
+		Username:                username,
+		Password:                password,
+	})
 
 	var err error
 

@@ -73,6 +73,8 @@ func (p Extrinsics) ToMongoExtrinsics(block Block) mongodb.Extrinsics  {
 		BlockTimestamp, _ = strconv.ParseInt(_BlockTimestamp[0:len(_BlockTimestamp) -3], 10, 64)
 	}
 
+	nonce, ok := p.Nonce.(string)
+
 	data := mongodb.Extrinsics{
 		//ExtrinsicIndex:     0,
 		BlockNum:           BlockNum,
@@ -86,7 +88,7 @@ func (p Extrinsics) ToMongoExtrinsics(block Block) mongodb.Extrinsics  {
 		Args:               "",
 		Address:            address,
 		//Signature:          "",
-		Nonce:              p.Nonce,
+		Nonce:              nonce,
 		//Era:                "",
 		ExtrinsicHash:      p.Hash,
 		IsSigned:           IsSigned,
