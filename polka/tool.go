@@ -25,7 +25,7 @@ func (p Extrinsics) ToMongoExtrinsics(block Block) mongodb.Extrinsics  {
 	} else {
 		dest, ok := argsArr["dest"].(map[string]interface{})
 		if ok {
-			destAddress, _ = dest["Id"].(string)
+			destAddress, _ = dest["id"].(string)
 		}
 	}
 
@@ -48,7 +48,7 @@ func (p Extrinsics) ToMongoExtrinsics(block Block) mongodb.Extrinsics  {
 
 		if !ok {
 			signer := signature["signer"].(map[string]interface{})
-			address = signer["Id"].(string)
+			address = signer["id"].(string)
 		}
 
 		IsSigned = true
@@ -136,7 +136,7 @@ func (p Extrinsics) ToMongoAddressBalanceChangeList(block Block) []mongodb.Addre
 			//3899547块 之后返回格式
 			if !ok {
 				signer := signature["signer"].(map[string]interface{})
-				from = signer["Id"].(string)
+				from = signer["id"].(string)
 			}
 
 			args := p.Args.(map[string]interface{})
@@ -144,7 +144,7 @@ func (p Extrinsics) ToMongoAddressBalanceChangeList(block Block) []mongodb.Addre
 			to, ok := args["dest"].(string)
 			if !ok {
 				dest := args["dest"].(map[string]interface{})
-				to, ok = dest["Id"].(string)
+				to, ok = dest["id"].(string)
 				if !ok {
 					to, _ =  dest["Index"].(string)
 					to = fmt.Sprintf("index:%v", to)
