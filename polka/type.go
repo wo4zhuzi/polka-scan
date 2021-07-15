@@ -1,6 +1,6 @@
 package polka
 
-const Decimal  = 10
+const Decimal = 10
 
 //type Extrinsics struct {
 //	ExtrinsicIndex     int    	`bson:"extrinsic_index"`
@@ -23,43 +23,43 @@ const Decimal  = 10
 //}
 
 type Block struct {
-	Number			string
-	Hash 			string
-	ParentHash 		string
-	StateRoot		string
-	ExtrinsicsRoot  string
-	AuthorId  		string
-	Logs			[]Logs
-	OnInitialize	interface{}
-	Extrinsics		[]Extrinsics
-	OnFinalize		interface{}
+	Number         string
+	Hash           string
+	ParentHash     string
+	StateRoot      string
+	ExtrinsicsRoot string
+	AuthorId       string
+	Logs           []Logs
+	OnInitialize   interface{}
+	Extrinsics     []Extrinsics
+	OnFinalize     interface{}
 }
 
 type Logs struct {
-	Type 	string
-	Index 	string
-	Value	[]string
+	Type  string
+	Index string
+	Value []string
 }
 
 type Extrinsics struct {
-	Method		Method
-	Signature	interface{}
-	Nonce		interface{}
-	Args		interface{}
-	Tip			interface{}
-	Hash		string
-	Info 		interface{}
-	Events		[]Events
-	Success		bool
-	PaysFee 	bool
+	Method    Method
+	Signature interface{}
+	Nonce     interface{}
+	Args      interface{}
+	Tip       interface{}
+	Hash      string
+	Info      interface{}
+	Events    []Events
+	Success   bool
+	PaysFee   bool
 }
 
 type Events struct {
-	Method 	Method
-	Data 	[]interface{}
+	Method Method
+	Data   []interface{}
 }
 
 type Method struct {
-	Pallet 	string
-	Method	string
+	Pallet string
+	Method string
 }

@@ -23,14 +23,14 @@ func RunScan(concurrent int) error {
 	}
 
 	//往前推两个块，防止块数据不全
-	if height + concurrent > (onlineHeight - 2) {
-		log.Printf("%s 未出块 \r\n", height + concurrent)
-		time.Sleep(time.Duration(1)*time.Second)
+	if height+concurrent > (onlineHeight - 2) {
+		log.Printf("%s 未出块 \r\n", height+concurrent)
+		time.Sleep(time.Duration(1) * time.Second)
 		return nil
 	}
 
 	ch := make(chan mongodb.Aggregation, concurrent)
-	for i:=height; i< height + concurrent ;i++  {
+	for i := height; i < height+concurrent; i++ {
 		//time.Sleep(time.Millisecond * time.Duration(100))
 		go PushHeightData(i, ch)
 	}
@@ -39,7 +39,7 @@ func RunScan(concurrent int) error {
 	var eventsList []mongodb.Events
 	var addressBalanceChange []mongodb.AddressBalanceChange
 
-	for i:=height; i< height + concurrent ;i++  {
+	for i := height; i < height+concurrent; i++ {
 		aggregation := <-ch
 		extrinsicList = append(extrinsicList, aggregation.ExtrinsicsList...)
 		eventsList = append(eventsList, aggregation.EventsList...)
@@ -49,7 +49,7 @@ func RunScan(concurrent int) error {
 	if len(extrinsicList) != 0 {
 		//insertExtrinsicsList(extrinsicList)
 	} else {
-		log.Printf("高度 %d 获取数据异常、请检查节点", height);
+		log.Printf("高度 %d 获取数据异常、请检查节点", height)
 		return err
 	}
 
@@ -64,14 +64,14 @@ func RunScan(concurrent int) error {
 	upErr := UpdateBlockHeight(concurrent)
 
 	if upErr == nil {
-		log.Printf("height  %d ~ %d 插入成功\r\n", height, height + concurrent - 1)
+		log.Printf("height  %d ~ %d 插入成功\r\n", height, height+concurrent-1)
 	}
 
 	return err
 }
 
-func PushHeightData(height int,ch chan mongodb.Aggregation)  {
-	
+func PushHeightData(height int, ch chan mongodb.Aggregation) {
+
 	var extrinsicList []mongodb.Extrinsics
 	var eventsList []mongodb.Events
 	var addressBalanceChange []mongodb.AddressBalanceChange
@@ -82,7 +82,7 @@ func PushHeightData(height int,ch chan mongodb.Aggregation)  {
 		log.Fatalf("高度 %d 获取数据失败，请检查节点\r\n", height)
 	}
 
-	for _, extrinsic := range block.Extrinsics  {
+	for _, extrinsic := range block.Extrinsics {
 		extrinsicList = append(extrinsicList, extrinsic.ToMongoExtrinsics(block))
 		eventsList = append(eventsList, extrinsic.ToMongoEvensList()...)
 		addressBalanceChange = append(addressBalanceChange, extrinsic.ToMongoAddressBalanceChangeList(block)...)
@@ -96,7 +96,7 @@ func PushHeightData(height int,ch chan mongodb.Aggregation)  {
 
 }
 
-func GetLatestHeight() (height int, err error)  {
+func GetLatestHeight() (height int, err error) {
 	collection := mongodb.MongoClient.Database("polkadot").Collection("block_height")
 
 	var result mongodb.BlockHeight
@@ -106,11 +106,11 @@ func GetLatestHeight() (height int, err error)  {
 	return result.Height, err
 }
 
-func insertExtrinsicsList(extrinsicList []mongodb.Extrinsics) ([]interface{}, error)  {
+func insertExtrinsicsList(extrinsicList []mongodb.Extrinsics) ([]interface{}, error) {
 	collection := mongodb.MongoClient.Database("polkadot").Collection("extrinsics")
 
 	var insertExtrinsicList []interface{}
-	for _,v := range extrinsicList{
+	for _, v := range extrinsicList {
 		insertExtrinsicList = append(insertExtrinsicList, v)
 	}
 
@@ -123,11 +123,11 @@ func insertExtrinsicsList(extrinsicList []mongodb.Extrinsics) ([]interface{}, er
 	return insertManyResult.InsertedIDs, err
 }
 
-func insertEventsList(eventsList []mongodb.Events) ([]interface{}, error)  {
+func insertEventsList(eventsList []mongodb.Events) ([]interface{}, error) {
 	collection := mongodb.MongoClient.Database("polkadot").Collection("events")
 
 	var insertEventsList []interface{}
-	for _,v := range eventsList{
+	for _, v := range eventsList {
 		insertEventsList = append(insertEventsList, v)
 	}
 
@@ -135,19 +135,17 @@ func insertEventsList(eventsList []mongodb.Events) ([]interface{}, error)  {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	return insertManyResult.InsertedIDs, err
 }
 
-
-func insertAddressBalanceChange(addressBalanceChange []mongodb.AddressBalanceChange) ([]interface{}, error)  {
+func insertAddressBalanceChange(addressBalanceChange []mongodb.AddressBalanceChange) ([]interface{}, error) {
 	collection := mongodb.MongoClient.Database("polkadot").Collection("address_balance_change")
 
 	var insertAddressBalanceChange []interface{}
-	for _,v := range addressBalanceChange{
+	for _, v := range addressBalanceChange {
 		insertAddressBalanceChange = append(insertAddressBalanceChange, v)
 	}
-
 
 	insertManyResult, err := collection.InsertMany(context.TODO(), insertAddressBalanceChange)
 	if err != nil {
@@ -177,4 +175,3 @@ func UpdateBlockHeight(concurrent int) error {
 
 	return err
 }
-

@@ -11,10 +11,10 @@ import (
 	"strconv"
 )
 
-func (p Extrinsics) ToMongoExtrinsics(block Block) mongodb.Extrinsics  {
+func (p Extrinsics) ToMongoExtrinsics(block Block) mongodb.Extrinsics {
 
 	argsArr := p.Args.(map[string]interface{})
-	destAddress  := ""
+	destAddress := ""
 
 	var value float64 = 0
 
@@ -54,7 +54,7 @@ func (p Extrinsics) ToMongoExtrinsics(block Block) mongodb.Extrinsics  {
 		IsSigned = true
 	}
 
-	info , ok := p.Info.(map[string]interface{})
+	info, ok := p.Info.(map[string]interface{})
 	var fee int64 = 0
 	if ok {
 		partialFee, exists := info["partialFee"]
@@ -70,38 +70,38 @@ func (p Extrinsics) ToMongoExtrinsics(block Block) mongodb.Extrinsics  {
 	var BlockTimestamp int64 = 0
 	if exists {
 		_BlockTimestamp := now.(string)
-		BlockTimestamp, _ = strconv.ParseInt(_BlockTimestamp[0:len(_BlockTimestamp) -3], 10, 64)
+		BlockTimestamp, _ = strconv.ParseInt(_BlockTimestamp[0:len(_BlockTimestamp)-3], 10, 64)
 	}
 
 	nonce, ok := p.Nonce.(string)
 
 	data := mongodb.Extrinsics{
 		//ExtrinsicIndex:     0,
-		BlockNum:           BlockNum,
-		BlockTimestamp:     BlockTimestamp,
+		BlockNum:       BlockNum,
+		BlockTimestamp: BlockTimestamp,
 		//ExtrinsicLength:    "",
 		//VersionInfo:        "",
 		//CallCode:           "",
 		CallModule:         p.Method.Pallet,
 		CallModuleFunction: p.Method.Method,
 		//Args:               string(args),
-		Args:               "",
-		Address:            address,
+		Args:    "",
+		Address: address,
 		//Signature:          "",
-		Nonce:              nonce,
+		Nonce: nonce,
 		//Era:                "",
-		ExtrinsicHash:      p.Hash,
-		IsSigned:           IsSigned,
-		Success:            p.Success,
-		DestAddress:		destAddress,
-		Value:				value,
-		Fee:                fee,
+		ExtrinsicHash: p.Hash,
+		IsSigned:      IsSigned,
+		Success:       p.Success,
+		DestAddress:   destAddress,
+		Value:         value,
+		Fee:           fee,
 	}
 
 	return data
 }
 
-func (p Extrinsics) ToMongoAddressBalanceChangeList(block Block) []mongodb.AddressBalanceChange  {
+func (p Extrinsics) ToMongoAddressBalanceChangeList(block Block) []mongodb.AddressBalanceChange {
 	events := p.Events
 
 	BlockNum, _ := strconv.Atoi(block.Number)
@@ -110,10 +110,10 @@ func (p Extrinsics) ToMongoAddressBalanceChangeList(block Block) []mongodb.Addre
 	var BlockTimestamp int64 = 0
 	if exists {
 		_BlockTimestamp := now.(string)
-		BlockTimestamp, _ = strconv.ParseInt(_BlockTimestamp[0:len(_BlockTimestamp) -3], 10, 64)
+		BlockTimestamp, _ = strconv.ParseInt(_BlockTimestamp[0:len(_BlockTimestamp)-3], 10, 64)
 	}
 
-	info , ok := p.Info.(map[string]interface{})
+	info, ok := p.Info.(map[string]interface{})
 	var fee int64 = 0
 	if ok {
 		partialFee, exists := info["partialFee"]
@@ -123,7 +123,7 @@ func (p Extrinsics) ToMongoAddressBalanceChangeList(block Block) []mongodb.Addre
 		}
 	}
 
-	var addressBalanceChangeList  []mongodb.AddressBalanceChange
+	var addressBalanceChangeList []mongodb.AddressBalanceChange
 
 	//处理交易失败的数据
 	if p.Success == false {
@@ -146,7 +146,7 @@ func (p Extrinsics) ToMongoAddressBalanceChangeList(block Block) []mongodb.Addre
 				dest := args["dest"].(map[string]interface{})
 				to, ok = dest["id"].(string)
 				if !ok {
-					to, _ =  dest["Index"].(string)
+					to, _ = dest["Index"].(string)
 					to = fmt.Sprintf("index:%v", to)
 				}
 			}
@@ -181,7 +181,7 @@ func (p Extrinsics) ToMongoAddressBalanceChangeList(block Block) []mongodb.Addre
 				Value:         value,
 				Fee:           fee,
 				ExtrinsicHash: p.Hash,
-				Success: 	   p.Success,
+				Success:       p.Success,
 			}
 			addressBalanceChangeList = append(addressBalanceChangeList, addressBalanceChange)
 		}
@@ -190,7 +190,7 @@ func (p Extrinsics) ToMongoAddressBalanceChangeList(block Block) []mongodb.Addre
 	return addressBalanceChangeList
 }
 
-func (p Extrinsics) ToMongoEvensList() []mongodb.Events  {
+func (p Extrinsics) ToMongoEvensList() []mongodb.Events {
 
 	events := p.Events
 	var eventsList []mongodb.Events
@@ -200,7 +200,7 @@ func (p Extrinsics) ToMongoEvensList() []mongodb.Events  {
 
 		mongoEvents := mongodb.Events{
 			ExtrinsicHash:      p.Hash,
-			CallModule:        	p.Method.Pallet,
+			CallModule:         p.Method.Pallet,
 			CallModuleFunction: p.Method.Method,
 			Data:               string(data),
 		}
@@ -215,7 +215,7 @@ func GetBlockData(blockNum int) (Block, error) {
 	polkadotConf := conf.IniFile.Section("polkadot")
 	api := polkadotConf.Key("api").String()
 
-	resp, err := http.Get(""+ api +"/blocks/" + strconv.Itoa(blockNum))
+	resp, err := http.Get("" + api + "/blocks/" + strconv.Itoa(blockNum))
 
 	if err != nil {
 		fmt.Println(err)
@@ -234,11 +234,11 @@ func GetOnlineHeight() (int, error) {
 	polkadotConf := conf.IniFile.Section("polkadot")
 	api := polkadotConf.Key("api").String()
 
-	resp, err := http.Get(""+ api +"/blocks/head")
+	resp, err := http.Get("" + api + "/blocks/head")
 
 	if err != nil {
 		fmt.Println(err)
-		return 0,err
+		return 0, err
 	}
 
 	defer resp.Body.Close()
@@ -250,5 +250,5 @@ func GetOnlineHeight() (int, error) {
 	_number := block.Number
 	number, err := strconv.Atoi(_number)
 
-	return number,err
+	return number, err
 }

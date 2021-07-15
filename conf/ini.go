@@ -7,7 +7,7 @@ import (
 
 var IniFile *ini.File
 
-func init()  {
+func init() {
 	cfg, ini_err := ini.Load("conf.ini")
 	IniFile = cfg
 	if ini_err != nil {
